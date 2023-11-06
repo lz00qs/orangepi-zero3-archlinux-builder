@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-# 检查Python版本
+from scripts.out.py_modules.prepare import prepare_build_root
 import configparser
-from tools import Logger
 import os
-import subprocess
 import sys
-from tools import clone_to_dir, download_to_dir, extract_to_dir, run_relative_shell
+from scripts.out.py_modules.tools import Logger
 
 if sys.version_info < (3, 6):
     print("Python 3.6+ is required.")
@@ -60,14 +58,8 @@ if not os.path.exists(path_build_toolchains_xtools):
 path_scripts_in = os.path.join(path_base, "scripts/in")
 os.environ["PATH_SCRIPTS_IN"] = path_scripts_in
 
-try:
-    subprocess.run("python3 prepare_build_root.py", shell=True, check=True)
-except Exception as e:
-    logger.error("Prepare build root failed.")
-    sys.exit(1)
+prepare_build_root()
 
-try:
-    subprocess.run("python3 prepare_xtools.py", shell=True, check=True)
-except Exception as e:
-    logger.error("Prepare xtools failed.")
-    sys.exit(1)
+if cross_flag:
+    from scripts.out.py_modules.prepare import prepare_xtools
+    prepare_xtools()

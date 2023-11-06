@@ -1,4 +1,4 @@
 /build
 /.idea
 test.py
-__pycache__/tools.cpython-310.pyc
+*.pyc
