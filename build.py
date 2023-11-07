@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from scripts.out.py_modules.prepare import prepare_build_root
 from scripts.out.py_modules.tools import Logger
 import configparser
 import os
@@ -57,8 +56,9 @@ if not os.path.exists(path_build_toolchains_xtools):
 path_scripts_in = os.path.join(path_base, "scripts/in")
 os.environ["PATH_SCRIPTS_IN"] = path_scripts_in
 
-
-prepare_build_root()
+if os.path.exists(path_build_root):
+    from scripts.out.py_modules.prepare import prepare_build_root
+    prepare_build_root()
 
 if cross_flag:
     from scripts.out.py_modules.prepare import prepare_xtools
