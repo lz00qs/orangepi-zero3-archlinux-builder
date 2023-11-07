@@ -22,8 +22,8 @@ def prepare_build_root():
         url = config.get('UrlConfig', 'arch_aarch64_rootfs_url')
         download_to_dir(url, path_build_resources, 'aarch64_rootfs.tar.gz')
         try:
-            extract_to_dir(f"sudo bsdtar -C {path_build_root} --acls --xattrs -xpf "
-                           + os.path.join(path_build_resources, "aarch64_rootfs.tar.gz"), path_build_root)
+            subprocess.run(
+                "sudo -E python3 scripts/out/py_modules/extract_build_root.py", shell=True, check=True)
             mirror_url = url = config.get('PacManConfig', 'mirror_url')
             if mirror_url:
                 old_url = 'http://mirror.archlinuxarm.org/$arch/$repo'

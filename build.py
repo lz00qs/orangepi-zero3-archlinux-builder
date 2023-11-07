@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from scripts.out.py_modules.prepare import prepare_build_root
+from scripts.out.py_modules.tools import Logger
 import configparser
 import os
 import sys
-from scripts.out.py_modules.tools import Logger
 
 if sys.version_info < (3, 6):
     print("Python 3.6+ is required.")
@@ -12,7 +12,6 @@ if sys.version_info < (3, 6):
 os.environ["global_log_level"] = 'DEBUG'
 
 logger = Logger(name="log")
-
 logger.info("Python version satisfied, colorlog installed.")
 
 system_info = os.uname()
@@ -57,6 +56,7 @@ if not os.path.exists(path_build_toolchains_xtools):
 
 path_scripts_in = os.path.join(path_base, "scripts/in")
 os.environ["PATH_SCRIPTS_IN"] = path_scripts_in
+
 
 prepare_build_root()
 
