@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from scripts.out.py_modules.tools import Logger
+from scripts.out.py_modules.tools import Logger, run_relative_shell
 import configparser
 import os
 import sys
@@ -56,6 +56,12 @@ if not os.path.exists(path_build_toolchains_xtools):
 path_scripts_in = os.path.join(path_base, "scripts/in")
 os.environ["PATH_SCRIPTS_IN"] = path_scripts_in
 
+path_scripts_out = os.path.join(path_base, "scripts/out")
+os.environ["PATH_SCRIPTS_OUT"] = path_scripts_out
+
+os.environ["PATH_PKG"] = os.path.join(path_base, "pkg")
+os.environ["PATH_PKG_BUILT"] = os.path.join(path_base, "pkg_built")
+
 if os.path.exists(path_build_root):
     from scripts.out.py_modules.prepare import prepare_build_root
     prepare_build_root()
@@ -63,3 +69,5 @@ if os.path.exists(path_build_root):
 if cross_flag:
     from scripts.out.py_modules.prepare import prepare_xtools
     prepare_xtools()
+
+run_relative_shell(os.path.join(path_scripts_out, "download_pkg.sh"))

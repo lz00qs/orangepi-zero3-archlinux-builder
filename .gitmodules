@@ -1,0 +1,3 @@
+[submodule "pkg/linux-aarch64-orangepi-zero3"]
+	path = pkg/linux-aarch64-orangepi-zero3
+	url = https://github.com/lz00qs/archlinux-aarch64-orangepi-zero3.git
