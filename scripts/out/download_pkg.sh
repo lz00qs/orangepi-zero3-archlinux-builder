@@ -14,7 +14,6 @@ lib=
     done
     load_makepkg_config
     pushd "${PATH_PKG}" >/dev/null
-    local build_pkg=
     for build_pkg in *; do
         if [[ -d "${build_pkg}" ]]; then
             pushd "${build_pkg}" >/dev/null

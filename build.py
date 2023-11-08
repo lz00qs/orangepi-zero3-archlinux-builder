@@ -53,13 +53,12 @@ os.environ["PATH_BUILD_TOOLCHAINS_XTOOLS"] = path_build_toolchains_xtools
 if not os.path.exists(path_build_toolchains_xtools):
     os.mkdir(path_build_toolchains_xtools)
 
-path_scripts_in = os.path.join(path_base, "scripts/in")
-os.environ["PATH_SCRIPTS_IN"] = path_scripts_in
-
+os.environ["PATH_SCRIPTS"] = os.path.join(path_base, "scripts")
+os.environ["PATH_SCRIPTS_IN"] = os.path.join(path_base, "scripts/in")
 path_scripts_out = os.path.join(path_base, "scripts/out")
 os.environ["PATH_SCRIPTS_OUT"] = path_scripts_out
-
 os.environ["PATH_PKG"] = os.path.join(path_base, "pkg")
+os.environ["PATH_PKG_CROSS"] = os.path.join(path_base, "pkg_cross")
 os.environ["PATH_PKG_BUILT"] = os.path.join(path_base, "pkg_built")
 
 if os.path.exists(path_build_root):
@@ -71,3 +70,8 @@ if cross_flag:
     prepare_xtools()
 
 run_relative_shell(os.path.join(path_scripts_out, "download_pkg.sh"))
+
+run_relative_shell(os.path.join(path_scripts_out, "cross_build_pkg.sh"))
+
+import scripts.out.py_modules as modules
+modules.build_in_chroot()

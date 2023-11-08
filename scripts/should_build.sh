@@ -1,4 +1,4 @@
-source ../shell_log.sh
+# source ../shell_log.sh
 
 should_build() {
     local dir_pkg=$1
@@ -11,13 +11,14 @@ should_build() {
             pkgfile="${dir_pkg_built}/${pkgfilename}"
             if [ ! -f $pkgfile ]; then
                 log_i "${pkgfilename} not found, should build $dir_pkg"
+                popd >/dev/null
                 return 0
             fi
         done
         popd >/dev/null
         log_i "Package $dir_pkg already built"
     else
-        log_error "Package $dir_pkg not found"
+        log_e "Package $dir_pkg not found"
         return 1
     fi
     return $?

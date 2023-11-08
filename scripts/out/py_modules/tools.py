@@ -228,3 +228,14 @@ def run_relative_shell(shell_path, sudo=False):
         sys.exit(1)
     finally:
         os.chdir(current_dir)
+
+
+def run_cmd_with_exit(cmd, exit_code=1):
+    try:
+        return_code = os.system(cmd)
+        if return_code != 0:
+            logger.error(f"{cmd} failed.")
+            sys.exit(exit_code)
+    except Exception as e:
+        logger.error(f"{cmd} failed.")
+        sys.exit(exit_code)
