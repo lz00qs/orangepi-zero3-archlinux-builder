@@ -17,7 +17,7 @@ lib=
     for build_pkg in *; do
         if [[ -d "${build_pkg}" ]]; then
             pushd "${build_pkg}" >/dev/null
-            if should_build "${PATH_PKG}/${build_pkg}" "${PATH_PKG_BUILT}"; then
+            if should_build "${build_pkg}" "${PATH_PKG_BUILT}"; then
                 log_i "Downloading ${build_pkg}..."
                 if (
                     source_safe PKGBUILD

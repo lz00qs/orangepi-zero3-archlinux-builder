@@ -6,21 +6,21 @@ from scripts.out.py_modules.tools import Logger, run_cmd_with_exit
 logger = Logger(name="log")
 
 
-def get_config(path_config, config_name):
-    config_str = ''
-    with open(path_config, 'r') as input_file:
-        lines = input_file.readlines()
-        in_url_config = False  # 标志，指示是否在 UrlConfig 部分
-        for line in lines:
-            line = line.strip()  # 去除首尾空格和换行符
-            if line == f'[{config_name}]':
-                in_url_config = True  # 进入 UrlConfig 部分
-            elif line.startswith('[') and in_url_config:
-                in_url_config = False  # 退出 UrlConfig 部分
-            elif in_url_config and '=' in line:
-                key, value = line.split('=', 1)
-                config_str = config_str + f'{key.strip()}={value.strip()}\n'
-    return config_str.rstrip('\n')
+# def get_config(path_config, config_name):
+#     config_str = ''
+#     with open(path_config, 'r') as input_file:
+#         lines = input_file.readlines()
+#         in_url_config = False  # 标志，指示是否在 UrlConfig 部分
+#         for line in lines:
+#             line = line.strip()  # 去除首尾空格和换行符
+#             if line == f'[{config_name}]':
+#                 in_url_config = True  # 进入 UrlConfig 部分
+#             elif line.startswith('[') and in_url_config:
+#                 in_url_config = False  # 退出 UrlConfig 部分
+#             elif in_url_config and '=' in line:
+#                 key, value = line.split('=', 1)
+#                 config_str = config_str + f'{key.strip()}={value.strip()}\n'
+#     return config_str.rstrip('\n')
 
 
 # distccd_pid = ''
@@ -108,9 +108,8 @@ def build_in_chroot():
             f"sudo cp -ra {path_base}/scripts/shell_log.sh {path_build_in_root_absolute}/")
         run_cmd_with_exit(
             f"sudo cp -ra {path_base}/scripts/should_build.sh {path_build_in_root_absolute}/")
-        config = get_config(f"{path_base}/config.ini", 'BuildConfig')
-        run_cmd_with_exit(
-            f"echo '{config}' | sudo tee {path_build_in_root_absolute}/config")
+        config = os.environ["PATH_CONFIG_IN"]
+        run_cmd_with_exit(f"sudo cp -ra {config} {path_build_in_root_absolute}/config")
         logger.info("Mounting filesystems...")
         run_cmd_with_exit(
             f"sudo mount -o bind {path_build_root} {path_build_root}")

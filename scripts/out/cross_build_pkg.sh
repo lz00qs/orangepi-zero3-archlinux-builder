@@ -13,7 +13,7 @@ if [[ -d "${PATH_PKG_CROSS}" ]]; then
             dir_build_pkg="${PATH_PKG}/${build_pkg}"
             if [[ -d "${dir_build_pkg}" ]]; then
                 pushd "${dir_build_pkg}" >/dev/null
-                if should_build "${dir_build_pkg}" "${PATH_PKG_BUILT}"; then
+                if should_build "${build_pkg}" "${PATH_PKG_BUILT}"; then
                     should_build_pkg='yes'
                 else
                     hould_build_pkg=''

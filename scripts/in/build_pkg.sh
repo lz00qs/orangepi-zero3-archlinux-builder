@@ -47,7 +47,7 @@ build_pkg() {
             continue
         fi
         pushd "${build_pkg}" >/dev/null
-        if should_build "${dir_pkg_absolute}/${build_pkg}" "${dir_pkg_built_absolute}"; then
+        if should_build "${build_pkg}" "${dir_pkg_built_absolute}"; then
             log_i "Building package ${build_pkg}..."
             if [[ -d "${dir_pkg_cross_absolute}" ]]; then
                 local dir_build_cross_pkg="${dir_pkg_cross_absolute}/${build_pkg}"

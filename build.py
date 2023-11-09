@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from scripts.out.py_modules.tools import Logger, run_relative_shell
+from scripts.out.py_modules.tools import Logger, run_relative_shell, prepare_config, restore_config
 import configparser
 import os
 import sys
@@ -20,10 +20,6 @@ cross_flag = False
 if host_arch == "x86_64":
     cross_flag = True
     os.environ["CROSS"] = "True"
-
-
-config = configparser.ConfigParser()
-config.read('config.ini')
 
 path_base = os.getcwd()
 os.environ["PATH_BASE"] = path_base
@@ -61,17 +57,26 @@ os.environ["PATH_PKG"] = os.path.join(path_base, "pkg")
 os.environ["PATH_PKG_CROSS"] = os.path.join(path_base, "pkg_cross")
 os.environ["PATH_PKG_BUILT"] = os.path.join(path_base, "pkg_built")
 
-if os.path.exists(path_build_root):
-    from scripts.out.py_modules.prepare import prepare_build_root
-    prepare_build_root()
+os.environ["PKGEXT"] = ".pkg.tar"
 
-if cross_flag:
-    from scripts.out.py_modules.prepare import prepare_xtools
-    prepare_xtools()
+try:
+    prepare_config(os.path.join(path_base, "config.ini"))
+    if os.path.exists(path_build_root):
+        from scripts.out.py_modules.prepare import prepare_build_root
+        prepare_build_root()
 
-run_relative_shell(os.path.join(path_scripts_out, "download_pkg.sh"))
+    if cross_flag:
+        from scripts.out.py_modules.prepare import prepare_xtools
+        prepare_xtools()
 
-run_relative_shell(os.path.join(path_scripts_out, "cross_build_pkg.sh"))
+    run_relative_shell(os.path.join(path_scripts_out, "download_pkg.sh"))
 
-import scripts.out.py_modules as modules
-modules.build_in_chroot()
+    run_relative_shell(os.path.join(path_scripts_out, "cross_build_pkg.sh"))
+
+    import scripts.out.py_modules as modules
+    modules.build_in_chroot()
+except Exception as e:
+    logger.error(e)
+    sys.exit(1)
+finally:
+    restore_config(os.path.join(path_base, "config.ini"))
