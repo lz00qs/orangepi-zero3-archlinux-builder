@@ -1,3 +1,4 @@
+import configparser
 import os
 import shutil
 import subprocess
@@ -100,8 +101,8 @@ def build_in_chroot():
                 f"sudo cp -ra {path_base}/pkg_cross {path_build_in_root_absolute}/")
         run_cmd_with_exit(
             f"sudo cp -ra {path_base}/pkg_built {path_build_in_root_absolute}/")
-        run_cmd_with_exit(
-            f"sudo cp -ra {path_base}/releases {path_build_in_root_absolute}/")
+        # run_cmd_with_exit(
+        #     f"sudo cp -ra {path_base}/releases {path_build_in_root_absolute}/")
         run_cmd_with_exit(
             f"sudo cp -ra {path_base}/booting {path_build_in_root_absolute}/")
         run_cmd_with_exit(
@@ -118,16 +119,25 @@ def build_in_chroot():
             f"sudo --preserve-env=GOPROXY,http_proxy,https_proxy arch-chroot {path_build_root} {path_build_in_root}/build_in_chroot_entrypoint.sh")
         original_directory = os.getcwd()
         os.chdir(path_base)
-        for copy_back_folder in ["pkg_built", "releases"]:
+        for copy_back_folder in ["pkg_built"]:
             if subprocess.run(f"sudo tar -C {path_build_in_root_absolute} -c {copy_back_folder} | tar -x {copy_back_folder}", shell=True, check=True).returncode == 0:
                 subprocess.run(
                     f"sudo chown -R $(id --user):$(id --group) {copy_back_folder}", shell=True, check=True)
+        
+        path_pacstrap_rootfs = os.environ["PATH_PACSTRAP_ROOTFS"]
+        release_prefix = os.environ["RELEASE_PREFIX"]
+        os.chdir(path_pacstrap_rootfs)
+        run_cmd_with_exit(f"sudo bsdtar --acls --xattrs -cpf -  * | pigz -c -p32 > {path_base}/releases/{release_prefix}-rootfs.tar.gz")
+        
         os.chdir(original_directory)
     except Exception as e:
         logger.error("Extract build root error. " + e.__str__())
         sys.exit(1)
     finally:
-        os.chdir(original_directory)
+        try:
+            os.chdir(original_directory)
+        except Exception as e:
+            logger.error("Change directory error. " + e.__str__())
         try:
             logger.info("Unmounting filesystems...")
             run_cmd_with_exit(f"sudo umount -l -R {path_build_root}")

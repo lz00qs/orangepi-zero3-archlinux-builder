@@ -1,9 +1,11 @@
 /build
 /.idea
 /pkg_built
+/releases
 /pkg_cross/linux-aarch64-orangepi-zero3/builddir
 /pkg_cross/linux-aarch64-orangepi-zero3/dtbs.tar
 /pkg_cross/linux-aarch64-orangepi-zero3/headers.tar
 /pkg_cross/linux-aarch64-orangepi-zero3/kernel.tar
 test.py
 *.pyc
+log

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 from scripts.out.py_modules.tools import Logger, run_relative_shell, prepare_config, restore_config
 import configparser
 import os
@@ -56,11 +57,17 @@ os.environ["PATH_SCRIPTS_OUT"] = path_scripts_out
 os.environ["PATH_PKG"] = os.path.join(path_base, "pkg")
 os.environ["PATH_PKG_CROSS"] = os.path.join(path_base, "pkg_cross")
 os.environ["PATH_PKG_BUILT"] = os.path.join(path_base, "pkg_built")
+os.environ["PATH_PACSTRAP_ROOTFS"] = os.path.join(path_build_root, "home/alarm/build/pacstrap_rootfs")
 
 os.environ["PKGEXT"] = ".pkg.tar"
 
 try:
     prepare_config(os.path.join(path_base, "config.ini"))
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    release_prefix = config.get('ReleaseConfig', 'release_prefix')
+    release_prefix = f"{release_prefix}-" + datetime.now().strftime("%Y%m%d%H%M%S")
+    os.environ["RELEASE_PREFIX"] = release_prefix
     if os.path.exists(path_build_root):
         from scripts.out.py_modules.prepare import prepare_build_root
         prepare_build_root()
