@@ -4,7 +4,11 @@ This repository is dedicated to building an Arch Linux ARM image for the Orange 
 
 ## Acknowledgments
 
-Thanks for `https://github.com/7Ji/orangepi5-archlinuxarm`. Their work and project served as a valuable reference and inspiration for this repository.
+Thanks to `https://github.com/7Ji/orangepi5-archlinuxarm`. Their work and project served as a valuable reference and inspiration for this repository.
+
+If you have any problem, please open an issue.
+
+Also, welcome to contribute this repo to make this repo better!
 
 ## Usage
 
@@ -45,15 +49,12 @@ python3 build.py --build img
 ```
 > Default value is img, that means you will get an image finally.
 
+> You can change some configurations in `config.ini`.
+
 You can use clean.py to clean all built files:
 ```bash
 python3 clean.py
 ```
-
-
-If you have any problem, please open an issue.
-
-Also, welcome to contribute this repo to make this repo better!
 
 ## Contributions
 
