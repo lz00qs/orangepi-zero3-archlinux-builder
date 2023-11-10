@@ -116,7 +116,7 @@ def build_in_chroot():
             f"sudo mount -o bind {path_build_root} {path_build_root}")
         logger.info("Getting inside chroot...")
         run_cmd_with_exit(
-            f"sudo --preserve-env=GOPROXY,http_proxy,https_proxy arch-chroot {path_build_root} {path_build_in_root}/build_in_chroot_entrypoint.sh")
+            f"sudo --preserve-env=GOPROXY,http_proxy,https_proxy,build_option arch-chroot {path_build_root} {path_build_in_root}/build_in_chroot_entrypoint.sh")
         original_directory = os.getcwd()
         os.chdir(path_base)
         for copy_back_folder in ["pkg_built"]:
@@ -124,10 +124,15 @@ def build_in_chroot():
                 subprocess.run(
                     f"sudo chown -R $(id --user):$(id --group) {copy_back_folder}", shell=True, check=True)
         
-        path_pacstrap_rootfs = os.environ["PATH_PACSTRAP_ROOTFS"]
-        release_prefix = os.environ["RELEASE_PREFIX"]
-        os.chdir(path_pacstrap_rootfs)
-        run_cmd_with_exit(f"sudo bsdtar --acls --xattrs -cpf -  * | pigz -c -p32 > {path_base}/releases/{release_prefix}-rootfs.tar.gz")
+        build_option = os.environ["build_option"]
+        if build_option == "rootfs" or build_option == "img":
+            path_pacstrap_rootfs = os.environ["PATH_PACSTRAP_ROOTFS"]
+            release_prefix = os.environ["RELEASE_PREFIX"]
+            file_release_rootfs = f"{release_prefix}-rootfs.tar.gz"
+            os.environ["FILE_RELEASE_ROOTFS"] = file_release_rootfs
+            os.chdir(path_pacstrap_rootfs)
+            run_cmd_with_exit(f"sudo bsdtar --acls --xattrs -cpf -  * | pigz -c -p32 > {path_base}/releases/{file_release_rootfs}")
+            print("\n")
         
         os.chdir(original_directory)
     except Exception as e:

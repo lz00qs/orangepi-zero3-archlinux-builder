@@ -7,4 +7,6 @@ relative_source build_pkg.sh
 relative_source pacstrap_rootfs.sh
 
 build_pkg
-pacstrap_rootfs
+if [ "$build_option" == "rootfs" ] || [ "$build_option" == "img" ]; then
+    pacstrap_rootfs
+fi

@@ -2,8 +2,15 @@
 from datetime import datetime
 from scripts.out.py_modules.tools import Logger, run_relative_shell, prepare_config, restore_config
 import configparser
+import argparse
 import os
 import sys
+
+parser = argparse.ArgumentParser(description='Build options parser')
+parser.add_argument('--build', choices=['pkg', 'rootfs', 'img'], default='img', help='Build option')
+
+build_option = parser.parse_args().build
+os.environ["build_option"] = build_option
 
 if sys.version_info < (3, 6):
     print("Python 3.6+ is required.")
@@ -56,7 +63,17 @@ path_scripts_out = os.path.join(path_base, "scripts/out")
 os.environ["PATH_SCRIPTS_OUT"] = path_scripts_out
 os.environ["PATH_PKG"] = os.path.join(path_base, "pkg")
 os.environ["PATH_PKG_CROSS"] = os.path.join(path_base, "pkg_cross")
-os.environ["PATH_PKG_BUILT"] = os.path.join(path_base, "pkg_built")
+
+path_pkg_built = os.path.join(path_base, "pkg_built")
+os.environ["PATH_PKG_BUILT"] = path_pkg_built
+if not os.path.exists(path_pkg_built):
+    os.mkdir(path_pkg_built)
+
+path_releases = os.path.join(path_base, "releases")
+os.environ["PATH_RELEASES"] = path_releases
+if not os.path.exists(path_releases):
+    os.mkdir(path_releases)
+    
 os.environ["PATH_PACSTRAP_ROOTFS"] = os.path.join(path_build_root, "home/alarm/build/pacstrap_rootfs")
 
 os.environ["PKGEXT"] = ".pkg.tar"
@@ -78,7 +95,8 @@ try:
 
     run_relative_shell(os.path.join(path_scripts_out, "download_pkg.sh"))
 
-    run_relative_shell(os.path.join(path_scripts_out, "cross_build_pkg.sh"))
+    if cross_flag:
+        run_relative_shell(os.path.join(path_scripts_out, "cross_build_pkg.sh"))
 
     import scripts.out.py_modules as modules
     modules.build_in_chroot()
