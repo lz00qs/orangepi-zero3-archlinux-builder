@@ -131,7 +131,8 @@ def build_in_chroot():
             file_release_rootfs = f"{release_prefix}-rootfs.tar.gz"
             os.environ["FILE_RELEASE_ROOTFS"] = file_release_rootfs
             os.chdir(path_pacstrap_rootfs)
-            run_cmd_with_exit(f"sudo bsdtar --acls --xattrs -cpf -  * | pigz -c -p32 > {path_base}/releases/{file_release_rootfs}")
+            logger.info("Compressing rootfs...")
+            run_cmd_with_exit(f"sudo bsdtar --acls --xattrs -cpf -  * | pigz -c  -9  -p{os.cpu_count()} > {path_base}/releases/{file_release_rootfs}")
             print("\n")
         
         os.chdir(original_directory)

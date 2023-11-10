@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
-from scripts.out.py_modules.tools import Logger, run_relative_shell, prepare_config, restore_config
+from scripts.out.py_modules.tools import Logger, run_cmd_with_exit, run_relative_shell, prepare_config, restore_config
 import configparser
 import argparse
 import os
 import sys
 
 parser = argparse.ArgumentParser(description='Build options parser')
-parser.add_argument('--build', choices=['pkg', 'rootfs', 'img'], default='img', help='Build option')
+parser.add_argument(
+    '--build', choices=['pkg', 'rootfs', 'img'], default='img', help='Build option')
+parser.add_argument('--no_compress', action='store_true',
+                    default=False, help='Do not compress img')
 
 build_option = parser.parse_args().build
 os.environ["build_option"] = build_option
+no_compress = parser.parse_args().no_compress
 
 if sys.version_info < (3, 6):
     print("Python 3.6+ is required.")
@@ -73,8 +77,9 @@ path_releases = os.path.join(path_base, "releases")
 os.environ["PATH_RELEASES"] = path_releases
 if not os.path.exists(path_releases):
     os.mkdir(path_releases)
-    
-os.environ["PATH_PACSTRAP_ROOTFS"] = os.path.join(path_build_root, "home/alarm/build/pacstrap_rootfs")
+
+os.environ["PATH_PACSTRAP_ROOTFS"] = os.path.join(
+    path_build_root, "home/alarm/build/pacstrap_rootfs")
 
 os.environ["PKGEXT"] = ".pkg.tar"
 
@@ -83,7 +88,8 @@ try:
     config = configparser.ConfigParser()
     config.read('config.ini')
     release_prefix = config.get('ReleaseConfig', 'release_prefix')
-    release_prefix = f"{release_prefix}-" + datetime.now().strftime("%Y%m%d%H%M%S")
+    release_prefix = f"{release_prefix}-" + \
+        datetime.now().strftime("%Y%m%d%H%M%S")
     os.environ["RELEASE_PREFIX"] = release_prefix
     if os.path.exists(path_build_root):
         from scripts.out.py_modules.prepare import prepare_build_root
@@ -96,10 +102,16 @@ try:
     run_relative_shell(os.path.join(path_scripts_out, "download_pkg.sh"))
 
     if cross_flag:
-        run_relative_shell(os.path.join(path_scripts_out, "cross_build_pkg.sh"))
+        run_relative_shell(os.path.join(
+            path_scripts_out, "cross_build_pkg.sh"))
 
     import scripts.out.py_modules as modules
     modules.build_in_chroot()
+    if build_option == "img":
+        modules.create_img()
+    if not no_compress:
+        run_cmd_with_exit(
+            f"pigz -k -p{os.cpu_count()} -9 -c {os.environ['PATH_RELEASES']}/{os.environ['RELEASE_PREFIX']}.img > {os.environ['PATH_RELEASES']}/{os.environ['RELEASE_PREFIX']}.img.gz")
 except Exception as e:
     logger.error(e)
     sys.exit(1)
