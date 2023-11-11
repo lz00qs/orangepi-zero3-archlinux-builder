@@ -29,7 +29,8 @@ sudo apt install \
    qemu-user-static \
    u-boot-tools \
    python \
-   python3-pip
+   python3-pip \
+   pigz
 ```
 
 
