@@ -28,7 +28,7 @@ sudo apt install \
    libssl-dev \
    qemu-user-static \
    u-boot-tools \
-   python \
+   python3 \
    python3-pip \
    pigz
 ```
