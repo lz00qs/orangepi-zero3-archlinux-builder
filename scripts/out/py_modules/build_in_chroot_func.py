@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 import sys
-from scripts.out.py_modules.tools import Logger, run_cmd_with_exit
+from .tools import Logger, run_cmd_with_exit
 logger = Logger(name="log")
 
 

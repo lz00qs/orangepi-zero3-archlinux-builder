@@ -4,7 +4,7 @@ import configparser
 import subprocess
 
 # from tools import clone_to_dir, download_to_dir, extract_to_dir, run_relative_shell, Logger
-from scripts.out.py_modules.tools import extract_to_dir, download_to_dir, Logger
+from .tools import extract_to_dir, download_to_dir, Logger
 logger = Logger(name="log")
 
 path_build_resources = os.environ["PATH_BUILD_RESOURCES"]
