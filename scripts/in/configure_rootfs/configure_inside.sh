@@ -1,4 +1,5 @@
 relative_source ../shell_log.sh
+relative_source prepare_customize_inside.sh
 
 configure_inside() {
     log_i "Configuring basic setup inside the target rootfs..."
@@ -17,6 +18,7 @@ configure_inside() {
     local script_in_path="/root/inroot.sh"
     local script_actual_path="${dir_pacstrap_rootfs}${script_in_path}"
     sudo install -Dm755 "${script_out_path}" "${script_actual_path}"
+    prepare_customize_inside
     sudo arch-chroot "${dir_pacstrap_rootfs}" "${script_in_path}"
     sudo rm -f "${script_actual_path}" "${script_out_path}"
     log_i "Getting out from the target root"
