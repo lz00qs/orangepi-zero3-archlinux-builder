@@ -45,6 +45,7 @@ setup_users() {
 inside_root() {
   basic_setup
   setup_users
+  customize_inside
 }
 
 inside_root

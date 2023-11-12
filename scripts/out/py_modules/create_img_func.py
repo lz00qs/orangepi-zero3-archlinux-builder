@@ -145,9 +145,7 @@ def extract_built_rootfs():
     logger.info("Extracting built rootfs...")
     try:
         path_releases_rootfs = os.path.join(path_releases, f"{release_prefix}-rootfs.tar.gz")
-        # path_releases_rootfs = os.path.join(path_releases, "ArchLinuxArm-OrangePi-Zero3-20231110044432-rootfs.tar.gz")
         run_cmd_with_exit(f"sudo bsdtar -C {path_root} --acls --xattrs -xpf {path_releases_rootfs}")
-        # run_cmd_with_exit(f"ls {path_root}")
     except Exception as e:
         logger.error("Extract built rootfs error. " + e.__str__())
         sys.exit(1)
