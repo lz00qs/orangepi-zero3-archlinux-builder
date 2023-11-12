@@ -1,5 +1,6 @@
 relative_source ../shell_log.sh
 relative_source prepare_customize_inside.sh
+relative_source remove_customize_inside.sh
 
 configure_inside() {
     log_i "Configuring basic setup inside the target rootfs..."
@@ -21,5 +22,6 @@ configure_inside() {
     prepare_customize_inside
     sudo arch-chroot "${dir_pacstrap_rootfs}" "${script_in_path}"
     sudo rm -f "${script_actual_path}" "${script_out_path}"
+    remove_customize_inside
     log_i "Getting out from the target root"
 }
