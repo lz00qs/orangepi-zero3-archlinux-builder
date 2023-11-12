@@ -43,6 +43,9 @@ setup_users() {
 }
 
 inside_root() {
+  pacman-key --init
+  pacman -S --noconfirm archlinuxarm-keyring
+  pacman-key --populate archlinuxarm
   basic_setup
   setup_users
   customize_inside
