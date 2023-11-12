@@ -18,7 +18,7 @@ def prepare_build_root():
     if not os.path.exists(prepared_mark):
         logger.info("Start preparing build root")
         config = configparser.ConfigParser()
-        config.read('config.ini')
+        config.read('config.ini.split')
         url = config.get('UrlConfig', 'arch_aarch64_rootfs_url')
         download_to_dir(url, path_build_resources, 'aarch64_rootfs.tar.gz')
         try:
@@ -66,7 +66,7 @@ def prepare_xtools():
     if not os.path.exists(prepared_mark):
         logger.info("Start preparing xtools")
         config = configparser.ConfigParser()
-        config.read('config.ini')
+        config.read('config.ini.split')
         url = config.get('UrlConfig', 'xtools_url')
         download_to_dir(url, path_build_resources,
                         'xtools_aarch64_on_x86_64.tar.xz')

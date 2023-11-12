@@ -243,8 +243,8 @@ def run_cmd_with_exit(cmd, exit_code=1):
 def prepare_config(config_path):
     with open(config_path, 'r') as original_file:
         original_contents = original_file.read()
-    with open(f"{config_path}.bak", 'w') as backup_file:
-        backup_file.write(original_contents)
+    # with open(f"{config_path}.bak", 'w') as backup_file:
+    #     backup_file.write(original_contents)
     start_pos = original_contents.find('[BuildConfig]')
     if start_pos == -1:
         logger.error("[BuildConfig] section not found in the original file.")
@@ -257,10 +257,11 @@ def prepare_config(config_path):
     os.environ["PATH_CONFIG_IN"] = config_in
     with open(config_in, 'w') as new_file:
         new_file.write(build_config_contents.replace('[BuildConfig]', '').strip())
-    original_contents = original_contents[:start_pos] + original_contents[end_pos:]
-    with open(config_path, 'w') as original_file:
-        original_file.write(original_contents)
+    split_contents = original_contents[:start_pos] + original_contents[end_pos:]
+    with open(f"{config_path}.split", 'w') as split_file:
+        split_file.write(split_contents)
 
 def restore_config(config_path):
-    os.system(f"mv {config_path}.bak {config_path}")
+    # os.system(f"mv {config_path}.bak {config_path}")
+    os.system("rm -f " + f"{config_path}.split")
     

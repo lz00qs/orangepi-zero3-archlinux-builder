@@ -86,7 +86,7 @@ os.environ["PKGEXT"] = ".pkg.tar"
 try:
     prepare_config(os.path.join(path_base, "config.ini"))
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config.read('config.ini.split')
     release_prefix = config.get('ReleaseConfig', 'release_prefix')
     release_prefix = f"{release_prefix}-" + \
         datetime.now().strftime("%Y%m%d%H%M%S")

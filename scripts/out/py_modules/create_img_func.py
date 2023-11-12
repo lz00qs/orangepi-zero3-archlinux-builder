@@ -18,7 +18,7 @@ boot_part_end = ''
 def load_config():
     logger.info("Loading img config...")
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config.read('config.ini.split')
     global release_prefix
     release_prefix = os.environ["RELEASE_PREFIX"]
     global img_size
