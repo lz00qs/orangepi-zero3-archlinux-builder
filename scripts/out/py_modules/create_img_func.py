@@ -41,7 +41,8 @@ def create_blank_disk():
     logger.info("Creating blank disk...")
     try:
         run_cmd_with_exit(f"sudo rm -f {path_releases_img}")
-        run_cmd_with_exit(f"dd if=/dev/zero of={path_releases_img} bs={img_size} count=1")
+        img_size_num=int(img_size[:-1])
+        run_cmd_with_exit(f"dd if=/dev/zero of={path_releases_img} bs=1M count={img_size_num}")
     except Exception as e:
         logger.error("Create blank disk error. " + e.__str__())
         sys.exit(1)
