@@ -4,25 +4,28 @@ import subprocess
 import sys
 import uuid
 from .tools import Logger, run_cmd_with_exit
+
 logger = Logger(name="log")
 
-release_prefix = ''
-file_name_img = ''
-img_size = ''
-path_releases = ''
-path_releases_img = ''
-table_type = ''
-boot_part_start = ''
-boot_part_end = ''
+release_prefix = ""
+file_name_img = ""
+img_size = ""
+path_releases = ""
+path_releases_img = ""
+table_type = ""
+boot_part_start = ""
+boot_part_end = ""
+fstab_templete = ""
+
 
 def load_config():
     logger.info("Loading img config...")
     config = configparser.ConfigParser()
-    config.read('config.ini.split')
+    config.read("config.ini.split")
     global release_prefix
     release_prefix = os.environ["RELEASE_PREFIX"]
     global img_size
-    img_size = config.get('ImgConfig', 'img_size')
+    img_size = config.get("ImgConfig", "img_size")
     global file_name_img
     file_name_img = f"{release_prefix}.img"
     global path_releases_img
@@ -30,19 +33,23 @@ def load_config():
     path_releases = os.environ["PATH_RELEASES"]
     path_releases_img = os.path.join(path_releases, file_name_img)
     global table_type
-    table_type = config.get('ImgConfig', 'table_type')
+    table_type = config.get("ImgConfig", "table_type")
     global boot_part_start
-    boot_part_start = config.get('ImgConfig', 'boot_part_start')
+    boot_part_start = config.get("ImgConfig", "boot_part_start")
     global boot_part_end
-    boot_part_end = config.get('ImgConfig', 'boot_part_end')
+    boot_part_end = config.get("ImgConfig", "boot_part_end")
+    global fstab_templete
+    fstab_templete = config.get("FstabConfig", "fstab_templete")
 
 
 def create_blank_disk():
     logger.info("Creating blank disk...")
     try:
         run_cmd_with_exit(f"sudo rm -f {path_releases_img}")
-        img_size_num=int(img_size[:-1])
-        run_cmd_with_exit(f"dd if=/dev/zero of={path_releases_img} bs=1M count={img_size_num}")
+        img_size_num = int(img_size[:-1])
+        run_cmd_with_exit(
+            f"dd if=/dev/zero of={path_releases_img} bs=1M count={img_size_num}"
+        )
     except Exception as e:
         logger.error("Create blank disk error. " + e.__str__())
         sys.exit(1)
@@ -51,26 +58,41 @@ def create_blank_disk():
 def create_partition():
     logger.info("Creating disk partition...")
     if table_type == "msdos":
-        run_cmd_with_exit(f"parted {path_releases_img} mklabel msdos " + \
-            f"mkpart primary fat32 {boot_part_start}iB {boot_part_end}iB " + \
-            f"set 1 boot on mkpart primary ext4 {boot_part_end}iB 100%")
+        run_cmd_with_exit(
+            f"parted {path_releases_img} mklabel msdos "
+            + f"mkpart primary fat32 {boot_part_start}iB {boot_part_end}iB "
+            + f"set 1 boot on mkpart primary ext4 {boot_part_end}iB 100%"
+        )
     elif table_type == "gpt":
-        run_cmd_with_exit(f"parted {path_releases_img} mklabel  " + \
-            f"mkpart ArchBoot fat32 {boot_part_start}iB {boot_part_end}iB " + \
-            f"mkpart ArchRoot ext4 {boot_part_end}iB 100%")
+        run_cmd_with_exit(
+            f"parted {path_releases_img} mklabel  "
+            + f"mkpart ArchBoot fat32 {boot_part_start}iB {boot_part_end}iB "
+            + f"mkpart ArchRoot ext4 {boot_part_end}iB 100%"
+        )
     else:
         logger.error("Unknown table type.")
         sys.exit(1)
 
 
-loop_device = ''
-loop_boot = ''
-loop_root = ''
+loop_device = ""
+loop_boot = ""
+loop_root = ""
+
+
 def setup_loop():
     logger.info("Setting up loop device...")
     try:
         global loop_device
-        loop_device = subprocess.run(f"sudo losetup -fP --show {path_releases_img}", shell=True, check=True, capture_output=True).stdout.decode('utf-8').rstrip('\n')
+        loop_device = (
+            subprocess.run(
+                f"sudo losetup -fP --show {path_releases_img}",
+                shell=True,
+                check=True,
+                capture_output=True,
+            )
+            .stdout.decode("utf-8")
+            .rstrip("\n")
+        )
         logger.info(f"Using loop device {loop_device}")
         global loop_boot
         loop_boot = f"{loop_device}p1"
@@ -79,18 +101,22 @@ def setup_loop():
     except Exception as e:
         logger.error("Set up loop device error. " + e.__str__())
         sys.exit(1)
-        
-        
-uuid_boot_mkfs=''
-uuid_boot_specifier=''
-uuid_root=''
+
+
+uuid_boot_mkfs = ""
+uuid_boot_specifier = ""
+uuid_root = ""
+
+
 def generate_uuid():
     logger.info("Generating uuid...")
     global uuid_boot_mkfs
     uuid_boot_mkfs = str(uuid.uuid4())[:8].upper()
     global uuid_boot_specifier
     uuid_boot_specifier = f"{uuid_boot_mkfs[:4]}-{uuid_boot_mkfs[4:]}"
-    logger.info(f"uuid_mkfs: {uuid_boot_mkfs} | uuid_boot_specifier: {uuid_boot_specifier}")
+    logger.info(
+        f"uuid_mkfs: {uuid_boot_mkfs} | uuid_boot_specifier: {uuid_boot_specifier}"
+    )
     global uuid_root
     uuid_root = str(uuid.uuid4())
     logger.info(f"uuid_root: {uuid_root}")
@@ -100,20 +126,33 @@ def create_fs():
     logger.info("Creating fs...")
     try:
         logger.info(f"Creating FAT32 FS with UUID {uuid_boot_mkfs} on {loop_boot}")
-        run_cmd_with_exit(f"sudo mkfs.vfat -n 'ALARMBOOT' -F 32 -i {uuid_boot_mkfs} {loop_boot}")
+        run_cmd_with_exit(
+            f"sudo mkfs.vfat -n 'ALARMBOOT' -F 32 -i {uuid_boot_mkfs} {loop_boot}"
+        )
         logger.info(f"Creating ext4 FS with UUID {uuid_root} on {loop_root}")
-        run_cmd_with_exit(f"sudo mkfs.ext4 -L 'ALARMROOT' -m 0 -U {uuid_root} {loop_root}")
+        run_cmd_with_exit(
+            f"sudo mkfs.ext4 -L 'ALARMROOT' -m 0 -U {uuid_root} {loop_root}"
+        )
     except Exception as e:
         logger.error("Create fs error. " + e.__str__())
         sys.exit(1)
 
-path_boot = ''
-path_root = ''
+
+path_boot = ""
+path_root = ""
+
+
 def mount_fs():
     try:
         global path_boot
         global path_root
-        path_root = subprocess.run(f"sudo mktemp -d", shell=True, check=True, capture_output=True).stdout.decode('utf-8').rstrip('\n')
+        path_root = (
+            subprocess.run(
+                f"sudo mktemp -d", shell=True, check=True, capture_output=True
+            )
+            .stdout.decode("utf-8")
+            .rstrip("\n")
+        )
         path_boot = os.path.join(path_root, "boot")
         logger.info(f"Mounting {loop_root} to {path_root}")
         run_cmd_with_exit(f"sudo mount -o noatime {loop_root} {path_root}")
@@ -145,36 +184,40 @@ def umount_fs():
 def extract_built_rootfs():
     logger.info("Extracting built rootfs...")
     try:
-        path_releases_rootfs = os.path.join(path_releases, f"{release_prefix}-rootfs.tar.gz")
-        run_cmd_with_exit(f"sudo bsdtar -C {path_root} --acls --xattrs -xpf {path_releases_rootfs}")
+        path_releases_rootfs = os.path.join(
+            path_releases, f"{release_prefix}-rootfs.tar.gz"
+        )
+        run_cmd_with_exit(
+            f"sudo bsdtar -C {path_root} --acls --xattrs -xpf {path_releases_rootfs}"
+        )
     except Exception as e:
         logger.error("Extract built rootfs error. " + e.__str__())
         sys.exit(1)
-        
 
-fstab_templete = """
-# Static information about the filesystems.
-# See fstab(5) for details.
 
-# <file system> <dir> <type> <options> <dump> <pass>
-# root partition with ext4 on SDcard / USB drive
-UUID=uuid_root       /       ext4    rw,noatime      0 1
-# boot partition with vfat on SDcard / USB drive
-UUID=uuid_boot  /boot   vfat    rw,noatime      0 2
-"""
 def generate_fstab():
     logger.info("Generating fstab...")
     try:
-        path_fstab_temp = subprocess.run(f"mktemp", shell=True, check=True, capture_output=True).stdout.decode('utf-8').rstrip('\n')
-        fstab_modified = fstab_templete.replace("uuid_boot", uuid_boot_specifier).replace("uuid_root", uuid_root)
+        path_fstab_temp = (
+            subprocess.run(f"mktemp", shell=True, check=True, capture_output=True)
+            .stdout.decode("utf-8")
+            .rstrip("\n")
+        )
+        fstab_modified = fstab_templete.replace(
+            "uuid_boot", uuid_boot_specifier
+        ).replace("uuid_root", uuid_root)
+        logger.debug(f"fstab_modified: {fstab_modified}")
         with open(path_fstab_temp, "w") as file:
             file.write(fstab_modified)
-        run_cmd_with_exit(f"sudo install -DTm 644 {path_fstab_temp} {path_root}/etc/fstab")
+        run_cmd_with_exit(
+            f"sudo install -DTm 644 {path_fstab_temp} {path_root}/etc/fstab"
+        )
         run_cmd_with_exit(f"cat {path_root}/etc/fstab")
     except Exception as e:
         logger.error("Generate fstab error. " + e.__str__())
         sys.exit(1)
-        
+
+
 def install_bootloader():
     logger.info("Installing bootloader...")
     path_base = os.environ["PATH_BASE"]
@@ -185,15 +228,19 @@ def install_bootloader():
                 script_name = script[:-3]
                 if script_name == "boot":
                     script_name = "boot.scr"
-                run_cmd_with_exit(f"sudo mkimage -A arm64 -O linux -T script -C none -d {os.path.join(path_booting,script)} {os.path.join(path_boot,script_name)}")
+                run_cmd_with_exit(
+                    f"sudo mkimage -A arm64 -O linux -T script -C none -d {os.path.join(path_booting,script)} {os.path.join(path_boot,script_name)}"
+                )
         run_cmd_with_exit(f"ls {path_boot}")
         uboot_name = "u-boot-sunxi-with-spl-opizero3-1gb.bin"
-        run_cmd_with_exit(f"sudo dd bs=1k seek=8 if={os.path.join(path_booting,uboot_name)} of={loop_device}")
+        run_cmd_with_exit(
+            f"sudo dd bs=1k seek=8 if={os.path.join(path_booting,uboot_name)} of={loop_device}"
+        )
     except Exception as e:
         logger.error("Install bootloader error. " + e.__str__())
         sys.exit(1)
 
-        
+
 def release_resources():
     logger.info("Releasing resources...")
     if loop_device:
@@ -201,8 +248,8 @@ def release_resources():
         run_cmd_with_exit(f"sudo losetup -d {loop_device}")
     if path_root:
         umount_fs()
-        
-        
+
+
 def create_img():
     logger.info("Creating img...")
     try:
@@ -221,4 +268,3 @@ def create_img():
         sys.exit(1)
     finally:
         release_resources()
-        
