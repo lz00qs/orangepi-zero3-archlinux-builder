@@ -11,6 +11,7 @@ configure_outside() {
         local orig_mirror_url="http://mirror.archlinuxarm.org/\$arch/\$repo"
         local sed_cmd="s#${orig_mirror_url}#${mirror_url}#g"
         sudo sed -i $sed_cmd $orig_mirrorlist_path
+        cat $orig_mirrorlist_path
     fi
 
     log_i "Setting timezone to ${timezone}"
