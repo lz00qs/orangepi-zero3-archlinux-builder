@@ -206,7 +206,6 @@ def generate_fstab():
         fstab_modified = fstab_templete.replace(
             "uuid_boot", uuid_boot_specifier
         ).replace("uuid_root", uuid_root)
-        logger.debug(f"fstab_modified: {fstab_modified}")
         with open(path_fstab_temp, "w") as file:
             file.write(fstab_modified)
         run_cmd_with_exit(
