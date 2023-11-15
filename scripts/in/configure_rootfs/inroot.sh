@@ -42,8 +42,24 @@ setup_users() {
   done
 }
 
+setup_mirror() {
+  echo " => Setting up mirror"
+  if [[ -z "${mirror_url}" ]]; then
+    echo "  -> No mirror URL is set, skipping setting up pacman mirrorlist"
+  else
+    local orig_mirrorlist_path="/etc/pacman.d/mirrorlist"
+    local orig_mirror_url="http://mirror.archlinuxarm.org/\$arch/\$repo"
+    local sed_cmd="s#${orig_mirror_url}#${mirror_url}#g"
+    sed -i $sed_cmd $orig_mirrorlist_path
+    # cat $orig_mirrorlist_path
+    echo "  -> Mirror URL is set to ${mirror_url}"
+  fi
+}
+
 inside_root() {
-  pacman -Syy
+  setup_mirror
+  cat /etc/pacman.d/mirrorlist
+  pacman -Syyu
   pacman-key --init
   pacman -S --noconfirm archlinuxarm-keyring
   pacman-key --populate archlinuxarm

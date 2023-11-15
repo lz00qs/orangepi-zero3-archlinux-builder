@@ -2,18 +2,6 @@ relative_source ../shell_log.sh
 
 configure_outside() {
     log_i "Configuring basic setup outside the target rootfs..."
-
-    if [[ -z "${mirror_url}" ]]; then
-        log_i "No mirror URL is set, skipping setting up pacman mirrorlist"
-    else
-        log_i "Setting up pacman mirrorlist"
-        local orig_mirrorlist_path="${dir_pacstrap_rootfs}/etc/pacman.d/mirrorlist"
-        local orig_mirror_url="http://mirror.archlinuxarm.org/\$arch/\$repo"
-        local sed_cmd="s#${orig_mirror_url}#${mirror_url}#g"
-        sudo sed -i $sed_cmd $orig_mirrorlist_path
-        cat $orig_mirrorlist_path
-    fi
-
     log_i "Setting timezone to ${timezone}"
     sudo ln -sf "/usr/share/zoneinfo/${timezone}" "${dir_pacstrap_rootfs}/etc/localtime"
     local locale_enable=()
