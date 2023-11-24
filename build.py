@@ -109,7 +109,7 @@ try:
     modules.build_in_chroot()
     if build_option == "img":
         modules.create_img()
-    if not no_compress:
+    if not no_compress and build_option == "img":
         run_cmd_with_exit(
             f"pigz -k -p{os.cpu_count()} -9 -c {os.environ['PATH_RELEASES']}/{os.environ['RELEASE_PREFIX']}.img > {os.environ['PATH_RELEASES']}/{os.environ['RELEASE_PREFIX']}.img.gz")
 except Exception as e:
